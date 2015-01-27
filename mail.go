@@ -26,7 +26,6 @@ func (m *Message) String() string {
 		fmt.Sprintf("Subject: %v\n", m.Header.Get("Subject"))
 
 		//output += fmt.Sprintf("\n%s\n", m.Content)
-
 	output += fmt.Sprintf("\n%s\n", m.SanitizeContent())
 
 	return output
