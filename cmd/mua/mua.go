@@ -15,7 +15,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/gophergala/gomua"
+	"github.com/frenata/gomua"
 )
 
 // client handles common data as a user navigates the MUA.
