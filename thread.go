@@ -30,16 +30,35 @@ func (t *MessageThread) String() string {
 			fmt.Sprintf("Subject: %v\n", t.head.msg.Header.Get("Subject")) +
 			fmt.Sprintf("\n%s\n", t.head.msg.Content)
 	} else {
-		output = "hello"
+		for node.next != nil {
+			output += fmt.Sprintf("From: %v\n", t.head.msg.Header.Get("From")) +
+				fmt.Sprintf("To: %v\n", t.head.msg.Header.Get("To")) +
+				fmt.Sprintf("Date: %v\n", t.head.msg.Header.Get("Date")) +
+				fmt.Sprintf("Subject: %v\n", t.head.msg.Header.Get("Subject")) +
+				fmt.Sprintf("\n%s\n|-\t", t.head.msg.Content)
+			node = node.next
+		}
 	}
 	return output
 }
 
 // Summary gets a summarized subject for this thread (i.e. remove Re: re: Re:)
 func (t *MessageThread) Summary() string {
-	subject := t.head.msg.Header.Get("Subject")
-	from := t.head.msg.Header.Get("From")
-	return fmt.Sprintf("%s from %s", color(subject, "31"), color(from, "33"))
+	node := t.head
+	var output string
+	if node.next == nil {
+		subject := t.head.msg.Header.Get("Subject")
+		from := t.head.msg.Header.Get("From")
+		return fmt.Sprintf("%s from %s", color(subject, "31"), color(from, "33"))
+	} else {
+		for node.next != nil {
+			subject := node.msg.Header.Get("Subject")
+			from := node.msg.Header.Get("From")
+			output += fmt.Sprintf("%s from %s\n\t", color(subject, "31"), color(from, "33"))
+			node = node.next
+		}
+	}
+	return output
 }
 
 func (t *MessageThread) appendNode(n *ThreadNode) {
