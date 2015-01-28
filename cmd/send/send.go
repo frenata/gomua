@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/gophergala/gomua"
+	"github.com/frenata/gomua"
 )
 
 func main() {

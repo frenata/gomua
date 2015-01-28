@@ -13,24 +13,33 @@ import (
 )
 
 type Message struct {
-	mail.Message
-	Content  string
+	*mail.Message
+	isStored bool
+	content  string
 	Filename string
 }
 
-func (m *Message) store() {
+func (m *Message) Content() string {
+	if !m.isStored {
+		m.Store()
+	}
+	return m.content
+}
+
+func (m *Message) Store() {
 	b, err := ioutil.ReadAll(m.Message.Body)
 	if err != nil {
 		log.Fatal(err)
 	}
-	m.Content = string(b)
+
+	m.content = string(b)
+	m.isStored = true
 }
 
 // ReadMessage embeds a mail.Message inside the gomua.Message and stores the Body content
 func ReadMessage(msg *mail.Message) *Message {
 	m := new(Message)
-	m.Message = *msg
-	m.store()
+	m.Message = msg
 
 	return m
 }
@@ -84,7 +93,7 @@ func (m *Message) SanitizeContent() string {
 		boundB = true
 	}
 
-	raw := bufio.NewScanner(strings.NewReader(m.Content))
+	raw := bufio.NewScanner(strings.NewReader(m.Content()))
 	buf := new(bytes.Buffer)
 	var write bool = true
 	for raw.Scan() {

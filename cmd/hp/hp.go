@@ -11,11 +11,12 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/gophergala/gomua"
 	"io"
 	"net/mail"
 	"os"
 	"path/filepath"
+
+	"github.com/frenata/gomua"
 )
 
 var exitCode = 0
