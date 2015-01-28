@@ -21,12 +21,17 @@ var threads = make(map[string]*MessageThread)
 
 // Display a threaded conversation
 func (t *MessageThread) String() string {
-	var output string = fmt.Sprintf("From: %v\n", t.head.msg.Header.Get("From")) +
-		fmt.Sprintf("To: %v\n", t.head.msg.Header.Get("To")) +
-		fmt.Sprintf("Date: %v\n", t.head.msg.Header.Get("Date")) +
-		fmt.Sprintf("Subject: %v\n", t.head.msg.Header.Get("Subject")) +
-		fmt.Sprintf("\n%s\n", t.head.msg.Content)
-
+	node := t.head
+	var output string
+	if node.next == nil {
+		output = fmt.Sprintf("From: %v\n", t.head.msg.Header.Get("From")) +
+			fmt.Sprintf("To: %v\n", t.head.msg.Header.Get("To")) +
+			fmt.Sprintf("Date: %v\n", t.head.msg.Header.Get("Date")) +
+			fmt.Sprintf("Subject: %v\n", t.head.msg.Header.Get("Subject")) +
+			fmt.Sprintf("\n%s\n", t.head.msg.Content)
+	} else {
+		output = "hello"
+	}
 	return output
 }
 
@@ -49,21 +54,18 @@ func Thread(msgs []Mail) []Mail {
 	// take a slice of mails
 	// make a hash table keyed off of subject for now
 
-	//thread := new(MessageThread)
 	// thread them!
-	for i, m := range msgs {
+	for _, m := range msgs {
 		// check the subject -- if we've seen it, put it in the list
 		node := new(ThreadNode)
 		node.msg = m.(*Message)
 		if threads[m.Summary()] == nil {
-			fmt.Printf("New thread (%d): '%v'\n", i, m.Summary())
 			thread := new(MessageThread)
-			thread.head = m
+			thread.head = node
 			threads[m.Summary()] = thread
 		} else {
-			threads[m.Summary()] =
-				fmt.Printf("Add to thread (%d): '%v'\n", i, m.Summary())
-			thread.appendNode(node)
+			existingThread := threads[m.Summary()]
+			existingThread.appendNode(node)
 		}
 	}
 	return msgs
