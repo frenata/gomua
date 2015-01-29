@@ -9,6 +9,7 @@ type MessageThread struct {
 	head *ThreadNode
 }
 
+// A ThreadNode is one element of the MessageThread linked list.
 type ThreadNode struct {
 	msg  *Message
 	next *ThreadNode
@@ -50,13 +51,13 @@ func (t *MessageThread) Summary() string {
 		subject := t.head.msg.Header.Get("Subject")
 		from := t.head.msg.Header.Get("From")
 		return fmt.Sprintf("%s from %s", color(subject, "31"), color(from, "33"))
-	} else {
-		for node.next != nil {
-			subject := node.msg.Header.Get("Subject")
-			from := node.msg.Header.Get("From")
-			output += fmt.Sprintf("\t%s from %s", color(subject, "31"), color(from, "33"))
-			node = node.next
-		}
+	}
+
+	for node.next != nil {
+		subject := node.msg.Header.Get("Subject")
+		from := node.msg.Header.Get("From")
+		output += fmt.Sprintf("\t%s from %s", color(subject, "31"), color(from, "33"))
+		node = node.next
 	}
 	return output
 }
@@ -69,6 +70,7 @@ func (t *MessageThread) appendNode(n *ThreadNode) {
 	node.next = n
 }
 
+// Thread takes a Mail slice and returns a map of ??? to Threads.
 func Thread(msgs []Mail) map[string]*MessageThread {
 	// take a slice of mails
 	// make a hash table keyed off of subject for now

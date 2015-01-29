@@ -17,7 +17,7 @@ type mailDir struct {
 
 // newMailDir returns a new mailDir ready to read a given directory.
 func newMailDir(dir string) *mailDir {
-	msgs := make([]*Message, 0)
+	var msgs []*Message
 	return &mailDir{dir: dir, msgs: msgs}
 }
 

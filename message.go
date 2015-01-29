@@ -42,7 +42,7 @@ type Message struct {
 
 // String prints a Message: some basic headers and the Message content.
 func (m *Message) String() string {
-	var output string = fmt.Sprintf("From: %v%s", m.Header.Get("From"), newline) +
+	var output = fmt.Sprintf("From: %v%s", m.Header.Get("From"), newline) +
 		fmt.Sprintf("To: %v%s", m.Header.Get("To"), newline) +
 		fmt.Sprintf("Date: %v%s", m.Header.Get("Date"), newline) +
 		fmt.Sprintf("Subject: %v%s", m.Header.Get("Subject"), newline)
@@ -102,7 +102,7 @@ func ReadMessage(r io.Reader) (*Message, error) {
 func (m *Message) Flag(flag string) {
 	s := strings.Split(m.filename, ":2")
 	if len(s) != 2 {
-		log.Fatal(fmt.Errorf("filename %s does not contain ':2'", m.Filename))
+		log.Fatal(fmt.Errorf("filename %s does not contain ':2'", m.Filename()))
 	}
 	name := s[0]
 	flags := s[1]
@@ -123,7 +123,7 @@ func (m *Message) Flag(flag string) {
 func (m *Message) IsFlagged(flag string) bool {
 	s := strings.Split(m.filename, ":2")
 	if len(s) != 2 {
-		log.Fatal(fmt.Errorf("filename %s does not contain ':2'", m.Filename))
+		log.Fatal(fmt.Errorf("filename %s does not contain ':2'", m.Filename()))
 	}
 	flags := s[1]
 
@@ -139,7 +139,7 @@ func (m *Message) Unread() bool {
 // --Probably not fully working.--
 func (m *Message) SanitizeContent() string {
 	var bound string
-	var boundB bool = false
+	var boundB = false
 	t := m.Header.Get("Content-Type")
 	if strings.Contains(t, "boundary=") {
 		bs := strings.Split(t, "boundary=")
@@ -149,7 +149,7 @@ func (m *Message) SanitizeContent() string {
 
 	raw := bufio.NewScanner(strings.NewReader(m.Content()))
 	buf := new(bytes.Buffer)
-	var write bool = true
+	var write = true
 	for raw.Scan() {
 		line := raw.Text()
 		if strings.Contains(line, "Content-Type:") {
@@ -216,7 +216,7 @@ func WriteContent(r io.Reader) string {
 	return content
 }
 
-// Saves a Message to a file.
+// Save writes a Message to a file.
 func Save(file string, m string) error {
 	b := bytes.NewBufferString(m).Bytes()
 	ioutil.WriteFile(file, b, 0600)

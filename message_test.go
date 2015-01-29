@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-var msgStr string = "From: test1@testing.com\r\nTo: test2@testing.com\r\nDate: Wed, 21 Jan 2015 02:00:03 -0500\r\nSubject: test mail\r\n\r\nTest Content\r\n"
+var msgStr = "From: test1@testing.com\r\nTo: test2@testing.com\r\nDate: Wed, 21 Jan 2015 02:00:03 -0500\r\nSubject: test mail\r\n\r\nTest Content\r\n"
 
 func Test_MessageString(t *testing.T) {
 	r := strings.NewReader(msgStr)

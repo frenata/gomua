@@ -14,7 +14,8 @@ import (
 	"time"
 )
 
-const ConfigLocation = "~/.gomua/gomua.cfg"
+// ConfigLocation specifies where a configuration file should be looked for.
+var ConfigLocation = "~/.gomua/gomua.cfg"
 
 // SMTPServer describes a connection to an SMTP server for sending mail.
 type SMTPServer struct {
