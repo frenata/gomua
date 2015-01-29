@@ -15,8 +15,6 @@ type ThreadNode struct {
 	next *ThreadNode
 }
 
-var threads = make(map[string]*MessageThread)
-
 // Take a slice of gomua.Messages and sort them into threads
 // A thread starts as a linked-list of gomua.Messages
 
@@ -72,6 +70,7 @@ func (t *MessageThread) appendNode(n *ThreadNode) {
 
 // Thread takes a Mail slice and returns a map of ??? to Threads.
 func Thread(msgs []Mail) map[string]*MessageThread {
+	threads := make(map[string]*MessageThread)
 	// take a slice of mails
 	// make a hash table keyed off of subject for now
 
