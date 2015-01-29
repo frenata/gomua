@@ -32,7 +32,7 @@ type client struct {
 }
 
 // reads from the config file, creates a new client
-func NewClient(filename string) (*client, error) {
+func newClient(filename string) (*client, error) {
 	c := new(client)
 
 	// TODO: much of the following is duplicated from send.go, refactor
@@ -181,7 +181,7 @@ func (c *client) printList(start, end int) (newstart int, newend int) {
 func (c *client) input(exit chan bool) {
 	var start, end int
 
-	fmt.Println("\n\nWelcome to GoMUA! Type 'help' for help.\n")
+	fmt.Printf("\n\nWelcome to GoMUA! Type 'help' for help.\n")
 	cli := bufio.NewScanner(os.Stdin)
 	for {
 		cli.Scan()
@@ -190,7 +190,7 @@ func (c *client) input(exit chan bool) {
 		switch {
 		case input == "help", input == "h":
 			fmt.Println(help())
-		case input == "main", input == "view":
+		case input == "main", input == "view", input == "list", input == "ls":
 			start = 0
 			start, end = c.printList(start, end)
 		case input == "more":
@@ -212,16 +212,13 @@ func (c *client) input(exit chan bool) {
 				viewMail(c.messages[num-1], os.Stdout)
 			}
 		}
-
 	}
-
-	exit <- true
 }
 
 func help() string {
 	output := fmt.Sprint(
 		"  help                 prints this help\n",
-		"  main                 view the list of mail in your mailbox\n",
+		"  list                 view the list of mail in your mailbox\n",
 		"  more                 prints more mail listings, if not all were printed previously\n",
 		"  #                    prints the details of the message #\n",
 		"  reply #              prompts for the text of your reply the message #, then sends it\n",
@@ -232,7 +229,7 @@ func help() string {
 
 func main() {
 	u, _ := user.Current()
-	client, err := NewClient(u.HomeDir + gomua.ConfigLocation[1:])
+	client, err := newClient(u.HomeDir + gomua.ConfigLocation[1:])
 	if err != nil {
 		log.Fatal(err)
 	}
