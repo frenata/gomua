@@ -17,8 +17,10 @@ import (
 const (
 	newline = "\r\n"
 	infotag = ":2,"
+)
 
-	// Maildir flags
+// Maildir flags
+const (
 	Passed  = "P"
 	Replied = "R"
 	Seen    = "S"
@@ -134,7 +136,7 @@ func (m *Message) Move(newpath string) error {
 func (m *Message) Flag(flag string) {
 	s := strings.Split(m.filename, infotag)
 	if len(s) != 2 {
-		log.Fatal(fmt.Errorf("filename %s does not contain '%s'", m.Filename()), infotag)
+		log.Fatal(fmt.Errorf("filename %s does not contain '%s'", m.Filename(), infotag))
 	}
 	name := s[0]
 	flags := s[1]
@@ -159,7 +161,7 @@ func (m *Message) Flag(flag string) {
 func (m *Message) IsFlagged(flag string) bool {
 	s := strings.Split(m.filename, infotag)
 	if len(s) != 2 {
-		log.Fatal(fmt.Errorf("filename %s does not contain '%s'", m.Filename()), infotag)
+		log.Fatal(fmt.Errorf("filename %s does not contain '%s'", m.Filename(), infotag))
 	}
 	flags := s[1]
 

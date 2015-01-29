@@ -27,14 +27,14 @@ func (t *MessageThread) String() string {
 			fmt.Sprintf("To: %v\n", t.head.msg.Header.Get("To")) +
 			fmt.Sprintf("Date: %v\n", t.head.msg.Header.Get("Date")) +
 			fmt.Sprintf("Subject: %v\n", t.head.msg.Header.Get("Subject")) +
-			fmt.Sprintf("\n%s\n", t.head.msg.Content)
+			fmt.Sprintf("\n%s\n", t.head.msg.Content())
 	} else {
 		for node.next != nil {
 			output += fmt.Sprintf("From: %v\n", t.head.msg.Header.Get("From")) +
 				fmt.Sprintf("To: %v\n", t.head.msg.Header.Get("To")) +
 				fmt.Sprintf("Date: %v\n", t.head.msg.Header.Get("Date")) +
 				fmt.Sprintf("Subject: %v\n", t.head.msg.Header.Get("Subject")) +
-				fmt.Sprintf("\n%s\n|-\t", t.head.msg.Content)
+				fmt.Sprintf("\n%s\n|-\t", t.head.msg.Content())
 			node = node.next
 		}
 	}
