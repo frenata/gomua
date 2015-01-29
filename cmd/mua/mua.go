@@ -77,13 +77,15 @@ func (c *client) scanMailDir(dir string) {
 	curmail := gomua.Scan(filepath.Join(dir, "cur"))
 
 	for _, m := range newmail {
-		folder, _ := filepath.Split(m.Filename())
-		root := strings.TrimRight(folder, "/new/")
-		newpath := filepath.Join(root, "cur")
+		if m, ok := m.(*gomua.Message); ok {
+			folder, _ := filepath.Split(m.Filename())
+			root := strings.TrimRight(folder, "/new/")
+			newpath := filepath.Join(root, "cur")
 
-		err := m.Move(newpath)
-		if err != nil {
-			log.Fatal(err)
+			err := m.Move(newpath)
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 		// TODO: I have *absolutely* no idea why the following line isn't necessary...
 		//msgs = append(msgs, m)

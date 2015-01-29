@@ -13,7 +13,7 @@ var msgStr = "From: test1@testing.com\r\nTo: test2@testing.com\r\nDate: Wed, 21 
 func Test_MessageString(t *testing.T) {
 	gomua.Save("_test.msg", msgStr)
 	msgs := gomua.Scan("_test.msg")
-	m := msgs[0]
+	m := msgs[0].(*gomua.Message)
 
 	if m.String() != msgStr {
 		t.Fatalf("\n%v\n did not parse correctly to \n%v\n", []byte(msgStr), []byte(m.String()))
@@ -32,7 +32,7 @@ func Test_EmptyMessage(t *testing.T) {
 func Test_MessageFlags(t *testing.T) {
 	gomua.Save("_test.msg", msgStr)
 	msgs := gomua.Scan("_test.msg")
-	m := msgs[0]
+	m := msgs[0].(*gomua.Message)
 
 	fmt.Println(m.Filename())
 	err := m.Move(".")

@@ -10,18 +10,6 @@ import (
 
 // Get messages
 
-// takes a Maildir directory, scans for messages, and returns a slice of Message structs.
-func scanMailDir(dir string) (msgs []Mail) {
-	mails := Scan(dir)
-
-	// Embed mail.Message inside gomua.Message
-	for _, m := range mails {
-		msgs = append(msgs, m)
-	}
-
-	return msgs
-}
-
 // takes a slice of Messages and prints a numbered list of summaries
 func viewMailList(msgs []Mail, w io.Writer) {
 	for i, m := range msgs {
@@ -31,7 +19,7 @@ func viewMailList(msgs []Mail, w io.Writer) {
 
 func TestGetMessages(t *testing.T) {
 	const dir string = "./cmd/mua/testmaildir"
-	msgs := scanMailDir(dir)
+	msgs := Scan(dir)
 	threads := Thread(msgs)
 	for _, m := range threads {
 		//fmt.Printf("%s\n", m.Summary())

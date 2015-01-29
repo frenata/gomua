@@ -12,12 +12,12 @@ import (
 // A mailDir defines a mail directory and a list of messages in that directory.
 type mailDir struct {
 	dir  string
-	msgs []*Message
+	msgs []Mail
 }
 
 // newMailDir returns a new mailDir ready to read a given directory.
 func newMailDir(dir string) *mailDir {
-	var msgs []*Message
+	var msgs []Mail
 	return &mailDir{dir: dir, msgs: msgs}
 }
 
@@ -58,7 +58,7 @@ func (md *mailDir) walkDir(path string) {
 }
 
 // Scan checks all files for the given path and returns a slice of Messages.
-func Scan(path string) []*Message {
+func Scan(path string) []Mail {
 	md := newMailDir(path)
 
 	switch dir, err := os.Stat(md.dir); {
