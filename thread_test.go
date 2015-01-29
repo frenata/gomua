@@ -34,6 +34,7 @@ func TestGetMessages(t *testing.T) {
 	msgs := scanMailDir(dir)
 	threads := Thread(msgs)
 	for _, m := range threads {
-		fmt.Printf("%s\n", m.Summary())
+		//fmt.Printf("%s\n", m.Summary())
+		_ = m
 	}
 }

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"net/mail"
 	"os"
 	"path/filepath"
 )
@@ -19,23 +18,10 @@ func processFile(filename string, in io.Reader, stdin bool) error {
 			return err
 		}
 		in = bytes.NewReader(b)
-		/*
-			f, err := os.Open(filename)
-			if err != nil {
-				return err
-			}
-			defer f.Close()
-			in = f
-		*/
 	}
 
-	m, err := mail.ReadMessage(in)
-	if err != nil {
-		return err
-	}
-
-	msg := ReadMessage(m)
-	msg.Filename, err = filepath.Abs(filename)
+	msg, err := ReadMessage(in)
+	msg.filename, err = filepath.Abs(filename)
 	if err != nil {
 		return err
 	}

@@ -12,13 +12,63 @@ import (
 	"strings"
 )
 
+const newline = "\r\n"
+
+// Mail interface defines mail to be read.
+// This can be a threaded list of messages, or a single message.
+//
+// String() should return a string representing what the user needs to see
+// to further interact with the Mail. For a single message, this should be
+// simply the message. For a threaded list of messages, this might be a list
+// of all messages in the thread, or possibly a just newest unread message?
+//
+// Summary() should return a short string that can fit on one line, suitable
+// for printing as 1 item in a list on a screen.
+// For instance, for a single message:
+//     Test Message from Frenata <mr.k.frenata@gmail.com>
+type Mail interface {
+	String() string
+	Summary() string
+}
+
+// Message implmenets the Mail interface. It holds an embedded mail.Message that it will store the Body
+// of on demand.
 type Message struct {
 	*mail.Message
 	isStored bool
 	content  string
-	Filename string
+	filename string
 }
 
+// String prints a Message: some basic headers and the Message content.
+func (m *Message) String() string {
+	var output string = fmt.Sprintf("From: %v%s", m.Header.Get("From"), newline) +
+		fmt.Sprintf("To: %v%s", m.Header.Get("To"), newline) +
+		fmt.Sprintf("Date: %v%s", m.Header.Get("Date"), newline) +
+		fmt.Sprintf("Subject: %v%s", m.Header.Get("Subject"), newline)
+
+		//output += fmt.Sprintf("\n%s\n", m.Content)
+	output += fmt.Sprintf("%s%s", newline, m.SanitizeContent())
+
+	return output
+}
+
+// Summary prints a one line summary of the Message content.
+func (m *Message) Summary() string {
+	subject := m.Header.Get("Subject")
+	from := m.Header.Get("From")
+	return fmt.Sprintf("%s from %s", color(subject, "31"), color(from, "33"))
+}
+
+// adds ANSI color to text
+func color(s string, color string) string {
+	return "\033[" + color + "m" + s + "\033[0m"
+}
+
+// Filename returns Message's current filename.
+func (m *Message) Filename() string { return m.filename }
+
+// Content stores the mesasage content if it hasn't yet been stored, then returns the content.
 func (m *Message) Content() string {
 	if !m.isStored {
 		m.Store()
@@ -26,6 +76,8 @@ func (m *Message) Content() string {
 	return m.content
 }
 
+// Store reads from the io.Reader in the embedded mail.Message.Body, then permanently stores this content
+// in the Message struct.
 func (m *Message) Store() {
 	b, err := ioutil.ReadAll(m.Message.Body)
 	if err != nil {
@@ -36,17 +88,19 @@ func (m *Message) Store() {
 	m.isStored = true
 }
 
-// ReadMessage embeds a mail.Message inside the gomua.Message and stores the Body content
-func ReadMessage(msg *mail.Message) *Message {
-	m := new(Message)
-	m.Message = msg
+// ReadMessage reads a Message from the designated Reader, and returns the Message.
+func ReadMessage(r io.Reader) (*Message, error) {
+	m, err := mail.ReadMessage(r)
+	if err != nil {
+		return nil, err
+	}
 
-	return m
+	return &Message{Message: m}, nil
 }
 
 // Flag sets a filename flag on the message.
 func (m *Message) Flag(flag string) {
-	s := strings.Split(m.Filename, ":2")
+	s := strings.Split(m.filename, ":2")
 	if len(s) != 2 {
 		log.Fatal(fmt.Errorf("filename %s does not contain ':2'", m.Filename))
 	}
@@ -60,14 +114,14 @@ func (m *Message) Flag(flag string) {
 		flags += flag
 
 		newname := name + ":2" + flags
-		os.Rename(m.Filename, newname)
-		m.Filename = newname
+		os.Rename(m.filename, newname)
+		m.filename = newname
 	}
 }
 
 // IsFlagged checks if the filename of the message is flagged with the given flag.
 func (m *Message) IsFlagged(flag string) bool {
-	s := strings.Split(m.Filename, ":2")
+	s := strings.Split(m.filename, ":2")
 	if len(s) != 2 {
 		log.Fatal(fmt.Errorf("filename %s does not contain ':2'", m.Filename))
 	}
@@ -105,7 +159,7 @@ func (m *Message) SanitizeContent() string {
 		if !strings.Contains(line, "Content-Transfer-Encoding") {
 			if !boundB || boundB && line != bound {
 				if write {
-					buf.WriteString(line + "\r\n")
+					buf.WriteString(line + newline)
 				}
 			}
 		}
@@ -144,6 +198,7 @@ func WriteMessage(r io.Reader) *mail.Message {
 	return m
 }
 
+// WriteContent interactively prompts the user for email content.
 func WriteContent(r io.Reader) string {
 	cli := bufio.NewScanner(r)
 	fmt.Print("Content: (Enter SEND to finish adding content and send the email.\n")
@@ -161,6 +216,7 @@ func WriteContent(r io.Reader) string {
 	return content
 }
 
+// Saves a Message to a file.
 func Save(file string, m string) error {
 	b := bytes.NewBufferString(m).Bytes()
 	ioutil.WriteFile(file, b, 0600)
