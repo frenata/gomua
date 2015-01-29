@@ -9,10 +9,30 @@ import (
 	"log"
 	"net/mail"
 	"os"
+	"path/filepath"
+	"sort"
 	"strings"
 )
 
-const newline = "\r\n"
+const (
+	newline = "\r\n"
+	infotag = ":2,"
+
+	// Maildir flags
+	Passed  = "P"
+	Replied = "R"
+	Seen    = "S"
+	Trashed = "T"
+	Draft   = "D"
+	Flagged = "F"
+)
+
+// for sorting strings by bytes, used to reorder file flags correctly.
+type byLetter []byte
+
+func (a byLetter) Len() int           { return len(a) }
+func (a byLetter) Less(i, j int) bool { return a[i] < a[j] }
+func (a byLetter) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 
 // Mail interface defines mail to be read.
 // This can be a threaded list of messages, or a single message.
@@ -98,22 +118,38 @@ func ReadMessage(r io.Reader) (*Message, error) {
 	return &Message{Message: m}, nil
 }
 
+// Move moves the Message to a new directory and appends the Info pre flag, if it has not been previously.
+func (m *Message) Move(newpath string) error {
+	name := filepath.Base(m.Filename())
+	newname := filepath.Join(newpath, name) + infotag
+	err := os.Rename(m.filename, newname)
+	if err != nil {
+		return err
+	}
+	m.filename = newname
+	return nil
+}
+
 // Flag sets a filename flag on the message.
 func (m *Message) Flag(flag string) {
-	s := strings.Split(m.filename, ":2")
+	s := strings.Split(m.filename, infotag)
 	if len(s) != 2 {
-		log.Fatal(fmt.Errorf("filename %s does not contain ':2'", m.Filename()))
+		log.Fatal(fmt.Errorf("filename %s does not contain '%s'", m.Filename()), infotag)
 	}
 	name := s[0]
 	flags := s[1]
 
 	if !strings.Contains(flags, flag) {
-		if flags[len(flags)-1] != ',' {
-			flags += ","
-		}
+		//if flags[len(flags)-1] != ',' {
+		//	flags += ","
+		//}
 		flags += flag
 
-		newname := name + ":2" + flags
+		bflags := []byte(flags)
+		sort.Sort(byLetter(bflags))
+		flags = string(bflags)
+
+		newname := name + infotag + flags
 		os.Rename(m.filename, newname)
 		m.filename = newname
 	}
@@ -121,9 +157,9 @@ func (m *Message) Flag(flag string) {
 
 // IsFlagged checks if the filename of the message is flagged with the given flag.
 func (m *Message) IsFlagged(flag string) bool {
-	s := strings.Split(m.filename, ":2")
+	s := strings.Split(m.filename, infotag)
 	if len(s) != 2 {
-		log.Fatal(fmt.Errorf("filename %s does not contain ':2'", m.Filename()))
+		log.Fatal(fmt.Errorf("filename %s does not contain '%s'", m.Filename()), infotag)
 	}
 	flags := s[1]
 
@@ -132,7 +168,7 @@ func (m *Message) IsFlagged(flag string) bool {
 
 // Unread returns true if the message is unread.
 func (m *Message) Unread() bool {
-	return !m.IsFlagged("S")
+	return !m.IsFlagged(Seen)
 }
 
 // SanitizeContent returns only text/plain content portions of the email.
