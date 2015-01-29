@@ -32,8 +32,8 @@ func viewMailList(msgs []Mail, w io.Writer) {
 func TestGetMessages(t *testing.T) {
 	const dir string = "./cmd/mua/testmaildir"
 	msgs := scanMailDir(dir)
-	msgs = Thread(msgs)
-	for _, m := range msgs {
+	threads := Thread(msgs)
+	for _, m := range threads {
 		fmt.Printf("%s\n", m.Summary())
 	}
 }

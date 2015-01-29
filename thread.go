@@ -54,7 +54,7 @@ func (t *MessageThread) Summary() string {
 		for node.next != nil {
 			subject := node.msg.Header.Get("Subject")
 			from := node.msg.Header.Get("From")
-			output += fmt.Sprintf("%s from %s\n\t", color(subject, "31"), color(from, "33"))
+			output += fmt.Sprintf("\t%s from %s", color(subject, "31"), color(from, "33"))
 			node = node.next
 		}
 	}
@@ -69,7 +69,7 @@ func (t *MessageThread) appendNode(n *ThreadNode) {
 	node.next = n
 }
 
-func Thread(msgs []Mail) []Mail {
+func Thread(msgs []Mail) map[string]*MessageThread {
 	// take a slice of mails
 	// make a hash table keyed off of subject for now
 
@@ -87,5 +87,5 @@ func Thread(msgs []Mail) []Mail {
 			existingThread.appendNode(node)
 		}
 	}
-	return msgs
+	return threads
 }
