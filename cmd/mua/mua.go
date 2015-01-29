@@ -77,11 +77,11 @@ func (c *client) scanMailDir(dir string) {
 	curmail := gomua.Scan(dir + "cur/")
 
 	for _, m := range newmail {
-		folder, name := filepath.Split(m.Filename)          // grab the base name and the path leading to it
+		folder, name := filepath.Split(m.Filename())        // grab the base name and the path leading to it
 		root := strings.TrimRight(folder, "/new/")          // slice off the expected "/new/" from the path to get the root Maildir
 		newname := filepath.Join(root, "cur", name) + ":2," // now add /cur/ to the root and the base name and the processed flag
-		err := os.Rename(m.Filename, newname)               // finally move the file to the new name as calculated above
-		m.Filename = newname
+		err := os.Rename(m.Filename(), newname)             // finally move the file to the new name as calculated above
+		//m.Filename() = newname
 		if err != nil {
 			log.Fatal(err)
 		}
