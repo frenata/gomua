@@ -8,7 +8,6 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
-	"net/mail"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -87,8 +86,7 @@ func (c *client) scanMailDir(dir string) {
 				log.Fatal(err)
 			}
 		}
-		// TODO: I have *absolutely* no idea why the following line isn't necessary...
-		//msgs = append(msgs, m)
+		msgs = append(msgs, m)
 	}
 
 	for _, cm := range curmail {
@@ -125,18 +123,20 @@ func viewMail(msg gomua.Mail, w io.Writer) {
 }
 
 // prompts the user for the response content, and sends a reply to the mail
-func replyMessage(old *gomua.Message, user string) (reply *mail.Message) {
+func replyMessage(old *gomua.Message, user string) (reply *gomua.Message) {
 	oldid := old.Header.Get("Message-ID")
 	oldref := old.Header.Get("References")
 
 	to := "To: " + old.Header.Get("From") + "\r\n"
 	from := fmt.Sprintf("From: %s\r\n", user)
 
-	subject := fmt.Sprintf("Subject: RE: %s\r\n", old.Header.Get("Subject"))
+	// TODO: Fix to not duplicate "Re"s.
+	subject := fmt.Sprintf("Subject: Re: %s\r\n", old.Header.Get("Subject"))
 	inreplyto := fmt.Sprintf("In-Reply-To: %s\r\n", oldid)
 	references := fmt.Sprintf("References: %s%s\r\n", oldref, oldid)
 
-	content := "\r\n\r\n" + gomua.WriteContent(os.Stdin)
+	// TODO: Add time of previous email.
+	content := "\r\n" + old.Header.Get("From") + " wrote:"
 	quote := bufio.NewScanner(strings.NewReader(old.SanitizeContent()))
 	for quote.Scan() {
 		line := quote.Text()
@@ -146,6 +146,7 @@ func replyMessage(old *gomua.Message, user string) (reply *mail.Message) {
 		}
 		content += "\n" + token + line
 	}
+	content += "\r\n" + gomua.WriteContent(os.Stdin)
 
 	buf := bytes.NewBufferString(inreplyto)
 	buf.WriteString(references)
@@ -154,7 +155,7 @@ func replyMessage(old *gomua.Message, user string) (reply *mail.Message) {
 	buf.WriteString(subject)
 	buf.WriteString(content)
 
-	reply, err := mail.ReadMessage(bytes.NewReader(buf.Bytes()))
+	reply, err := gomua.ReadMessage(bytes.NewReader(buf.Bytes()))
 	if err != nil {
 		log.Fatal(err)
 	}
