@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"net/mail"
 	"net/smtp"
 	"os/user"
 	"strconv"
@@ -94,7 +93,7 @@ func connectSMTP(s *SMTPServer) (*smtp.Client, error) {
 }
 
 // SendSMTP takes a SMTP server and a message, connects to the server, sends the message, and quits the connection to the server.
-func sendSMTP(server *SMTPServer, msg *mail.Message) error {
+func sendSMTP(server *SMTPServer, msg *Message) error {
 	// connect to SMTP server
 	var c *smtp.Client
 	c, err := connectSMTP(server)
@@ -143,9 +142,9 @@ func sendSMTP(server *SMTPServer, msg *mail.Message) error {
 		fmt.Fprint(wc, "\r\n")
 	}
 
-	body, _ := ioutil.ReadAll(msg.Body)
+	//body, _ := ioutil.ReadAll(msg.Body)
 
-	_, err = fmt.Fprintf(wc, "\n%s\n", body)
+	_, err = fmt.Fprintf(wc, "\n%s\n", msg.Content())
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -158,7 +157,7 @@ func sendSMTP(server *SMTPServer, msg *mail.Message) error {
 }
 
 // Send opens a new SMTP server connection from the config file and sends a message.
-func Send(msg *mail.Message) {
+func Send(msg *Message) {
 	// Look for a SMTPServer configuration file in ~/.gomua/send.cfg
 	u, _ := user.Current()
 	srv, err := NewSMTPServer(u.HomeDir + ConfigLocation[1:])

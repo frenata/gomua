@@ -8,5 +8,5 @@ import (
 
 func main() {
 	// write a message on the stdin and send it
-	gomua.Send(gomua.WriteMessage(os.Stdin))
+	gomua.Send(gomua.WriteMessage(os.Stdin, os.Stdin))
 }

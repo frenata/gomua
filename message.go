@@ -210,26 +210,27 @@ func (m *Message) SanitizeContent() string {
 }
 
 // WriteMessage interactively prompts the user for an email to send.
-func WriteMessage(r io.Reader) *mail.Message {
+// rewrite args for variable/optional second reader.
+func WriteMessage(r io.Reader, con io.Reader) *Message {
 	cli := bufio.NewScanner(r)
 
-	fmt.Print("To: ")
-	cli.Scan()
-	to := cli.Text()
 	fmt.Print("From: ")
 	cli.Scan()
 	from := cli.Text()
+	fmt.Print("To: ")
+	cli.Scan()
+	to := cli.Text()
 	fmt.Print("Subject: ")
 	cli.Scan()
 	subject := cli.Text()
-	content := WriteContent(r)
+	content := WriteContent(con)
 
 	msg := "Content-Type: text/plain; charset=UTF-8\r\n"
 	msg += fmt.Sprintf(
 		"To: %v\r\nFrom: %v\r\nSubject: %v\r\n\r\n%v",
 		to, from, subject, content)
 
-	m, err := mail.ReadMessage(strings.NewReader(msg))
+	m, err := ReadMessage(strings.NewReader(msg))
 	if err != nil {
 		log.Fatal(err)
 	}
