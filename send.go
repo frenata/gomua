@@ -7,14 +7,10 @@ import (
 	"io/ioutil"
 	"log"
 	"net/smtp"
-	"os/user"
 	"strconv"
 	"strings"
 	"time"
 )
-
-// ConfigLocation specifies where a configuration file should be looked for.
-var ConfigLocation = "~/.gomua/gomua.cfg"
 
 // SMTPServer describes a connection to an SMTP server for sending mail.
 type SMTPServer struct {
@@ -32,7 +28,7 @@ func NewSMTPServer(filename string) (*SMTPServer, error) {
 
 	b, err := ioutil.ReadFile(filename)
 	if err != nil {
-		return nil, errors.New("SMTP: missing " + ConfigLocation + " file.")
+		return nil, errors.New("SMTP: missing " + filename + " file.")
 	}
 
 	var smtp string
@@ -67,7 +63,7 @@ func NewSMTPServer(filename string) (*SMTPServer, error) {
 	}
 
 	if s.name == "" || s.username == "" || s.password == "" || s.address == "" || s.port == 0 {
-		return nil, errors.New("SMTP: incorrect " + ConfigLocation + " file.")
+		return nil, errors.New("SMTP: incorrect " + filename + " file.")
 	}
 	return s, nil
 }
@@ -157,10 +153,9 @@ func sendSMTP(server *SMTPServer, msg *Message) error {
 }
 
 // Send opens a new SMTP server connection from the config file and sends a message.
-func Send(msg *Message) {
+func Send(filename string, msg *Message) {
 	// Look for a SMTPServer configuration file in ~/.gomua/send.cfg
-	u, _ := user.Current()
-	srv, err := NewSMTPServer(u.HomeDir + ConfigLocation[1:])
+	srv, err := NewSMTPServer(filename)
 	if err != nil {
 		fmt.Println(err)
 		return
