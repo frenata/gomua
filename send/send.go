@@ -1,4 +1,4 @@
-package gomua
+package send
 
 import (
 	"crypto/tls"
@@ -10,6 +10,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/frenata/gomua"
 )
 
 // SMTPServer describes a connection to an SMTP server for sending mail.
@@ -89,7 +91,7 @@ func connectSMTP(s *SMTPServer) (*smtp.Client, error) {
 }
 
 // SendSMTP takes a SMTP server and a message, connects to the server, sends the message, and quits the connection to the server.
-func sendSMTP(server *SMTPServer, msg *Message) error {
+func sendSMTP(server *SMTPServer, msg *gomua.Message) error {
 	// connect to SMTP server
 	var c *smtp.Client
 	c, err := connectSMTP(server)
@@ -153,7 +155,7 @@ func sendSMTP(server *SMTPServer, msg *Message) error {
 }
 
 // Send opens a new SMTP server connection from the config file and sends a message.
-func Send(filename string, msg *Message) {
+func Send(filename string, msg *gomua.Message) {
 	// Look for a SMTPServer configuration file in ~/.gomua/send.cfg
 	srv, err := NewSMTPServer(filename)
 	if err != nil {

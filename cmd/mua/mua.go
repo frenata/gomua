@@ -15,6 +15,7 @@ import (
 	"strings"
 
 	"github.com/frenata/gomua"
+	"github.com/frenata/gomua/send"
 )
 
 // client handles common data as a user navigates the MUA.
@@ -205,7 +206,7 @@ func (c *client) input(exit chan bool) {
 			}
 			old := c.messages[num-1].(*gomua.Message)
 			reply := replyMessage(old, c.user)
-			gomua.Send(c.configFile, reply)
+			send.Send(c.configFile, reply)
 			old.Flag("R")
 		case input == "exit", input == "x", input == "quit", input == "q":
 			exit <- true
