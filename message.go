@@ -1,4 +1,4 @@
-package gomua
+package mua
 
 import (
 	"bufio"

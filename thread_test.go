@@ -1,4 +1,4 @@
-package gomua
+package mua
 
 import (
 	"strings"
@@ -6,7 +6,7 @@ import (
 )
 
 func TestGetMessages(t *testing.T) {
-	const dir string = "./cmd/mua/testmaildir"
+	const dir string = "./cmd/humbug/testmaildir"
 	msgs := Scan(dir)
 	threads := Thread(msgs)
 

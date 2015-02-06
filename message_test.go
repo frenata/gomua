@@ -1,19 +1,19 @@
-package gomua_test
+package mua_test
 
 import (
 	"fmt"
 	"strings"
 	"testing"
 
-	"github.com/frenata/gomua"
+	"github.com/frenata/mua"
 )
 
 var msgStr = "From: test1@testing.com\r\nTo: test2@testing.com\r\nDate: Wed, 21 Jan 2015 02:00:03 -0500\r\nSubject: test mail\r\n\r\nTest Content\r\n"
 
-func scanStr(s string) *gomua.Message {
-	gomua.Save("_test.msg", s)
-	msgs := gomua.Scan("_test.msg")
-	m := msgs[0].(*gomua.Message)
+func scanStr(s string) *mua.Message {
+	mua.Save("_test.msg", s)
+	msgs := mua.Scan("_test.msg")
+	m := msgs[0].(*mua.Message)
 
 	return m
 }
@@ -38,7 +38,7 @@ func Test_MessageString(t *testing.T) {
 
 func Test_EmptyMessage(t *testing.T) {
 	r := strings.NewReader("")
-	m, _ := gomua.ReadMessage(r)
+	m, _ := mua.ReadMessage(r)
 	if m != nil {
 		t.Fatal("Message parsed from empty string should return nil.")
 	}
@@ -52,7 +52,7 @@ func Test_WriteMessage(t *testing.T) {
 
 	r := strings.NewReader(wStr)
 	c := strings.NewReader(cStr)
-	mScan := gomua.WriteMessage(r, c)
+	mScan := mua.WriteMessage(r, c)
 	if m.String() != mScan.String() {
 		fmt.Println([]byte(m.String()))
 		fmt.Println([]byte(mScan.String()))
@@ -71,12 +71,12 @@ func Test_MessageFlags(t *testing.T) {
 	if !m.Unread() {
 		t.Fatalf("Newly scanned message %s does not show as unread.\n", m.Filename())
 	}
-	m.Flag(gomua.Seen)
-	if !m.IsFlagged(gomua.Seen) {
+	m.Flag(mua.Seen)
+	if !m.IsFlagged(mua.Seen) {
 		t.Fatalf("Flagging then checking for flag fails.")
 	}
-	m.Flag(gomua.Replied)
-	if !m.IsFlagged(gomua.Replied) {
+	m.Flag(mua.Replied)
+	if !m.IsFlagged(mua.Replied) {
 		t.Fatalf("Flagging then checking for flag fails.")
 	}
 	if !strings.Contains(m.Filename(), "RS") {

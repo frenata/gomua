@@ -14,8 +14,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/frenata/gomua"
-	"github.com/frenata/gomua/msa"
+	"github.com/frenata/mua"
+	"github.com/frenata/mua/msa"
 )
 
 // client handles common data as a user navigates the MUA.
@@ -24,8 +24,8 @@ import (
 // displayN is the # of Mail to display on the screen at one time.
 // user is the user's email address, for sending.
 type client struct {
-	messages   []gomua.Mail
-	current    gomua.Mail
+	messages   []mua.Mail
+	current    mua.Mail
 	displayN   int
 	user       string
 	dir        string
@@ -72,14 +72,14 @@ func newClient(filename string) (*client, error) {
 
 // takes a Maildir directory, scans for messages, and returns a slice of Message structs.
 func (c *client) scanMailDir(dir string) {
-	var msgs []gomua.Mail
+	var msgs []mua.Mail
 
 	// scan new and cur folder
-	newmail := gomua.Scan(filepath.Join(dir, "new"))
-	curmail := gomua.Scan(filepath.Join(dir, "cur"))
+	newmail := mua.Scan(filepath.Join(dir, "new"))
+	curmail := mua.Scan(filepath.Join(dir, "cur"))
 
 	for _, m := range newmail {
-		if m, ok := m.(*gomua.Message); ok {
+		if m, ok := m.(*mua.Message); ok {
 			folder, _ := filepath.Split(m.Filename())
 			root := strings.TrimRight(folder, "/new/")
 			newpath := filepath.Join(root, "cur")
@@ -100,11 +100,11 @@ func (c *client) scanMailDir(dir string) {
 }
 
 // takes a slice of Messages and prints a numbered list of summaries
-func viewMailList(msgs []gomua.Mail, start int, w io.Writer) {
+func viewMailList(msgs []mua.Mail, start int, w io.Writer) {
 	var unread string
 	for i, msg := range msgs {
 		switch m := msg.(type) {
-		case *gomua.Message:
+		case *mua.Message:
 			if m.Unread() {
 				unread = color("(Unread) ", "34")
 			} else {
@@ -116,17 +116,17 @@ func viewMailList(msgs []gomua.Mail, start int, w io.Writer) {
 }
 
 // prints a single mail message to the screen
-func viewMail(msg gomua.Mail, w io.Writer) {
+func viewMail(msg mua.Mail, w io.Writer) {
 	fmt.Fprint(w, msg)
 
 	switch m := msg.(type) {
-	case *gomua.Message:
+	case *mua.Message:
 		m.Flag("S")
 	}
 }
 
 // prompts the user for the response content, and sends a reply to the mail
-func replyMessage(old *gomua.Message, user string) (reply *gomua.Message) {
+func replyMessage(old *mua.Message, user string) (reply *mua.Message) {
 	oldid := old.Header.Get("Message-ID")
 	oldref := old.Header.Get("References")
 
@@ -149,7 +149,7 @@ func replyMessage(old *gomua.Message, user string) (reply *gomua.Message) {
 		}
 		content += "\n" + token + line
 	}
-	content += "\r\n" + gomua.WriteContent(os.Stdin)
+	content += "\r\n" + mua.WriteContent(os.Stdin)
 
 	buf := bytes.NewBufferString(inreplyto)
 	buf.WriteString(references)
@@ -158,7 +158,7 @@ func replyMessage(old *gomua.Message, user string) (reply *gomua.Message) {
 	buf.WriteString(subject)
 	buf.WriteString(content)
 
-	reply, err := gomua.ReadMessage(bytes.NewReader(buf.Bytes()))
+	reply, err := mua.ReadMessage(bytes.NewReader(buf.Bytes()))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -204,7 +204,7 @@ func (c *client) input(exit chan bool) {
 			if err != nil {
 				fmt.Println(err)
 			}
-			old := c.messages[num-1].(*gomua.Message)
+			old := c.messages[num-1].(*mua.Message)
 			reply := replyMessage(old, c.user)
 			msa.Send(c.configFile, reply)
 			old.Flag("R")
@@ -232,7 +232,7 @@ func help() string {
 }
 
 func main() {
-	var configLoc = "~/.gomua/gomua.cfg"
+	var configLoc = "~/.humbug/humbug.cfg"
 	u, _ := user.Current()
 	client, err := newClient(u.HomeDir + configLoc[1:])
 	if err != nil {
