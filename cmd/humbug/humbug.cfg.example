@@ -1,4 +1,4 @@
-// Fill in the relevant data, and move this file to ~/.gomua/gomua.cfg
+// Fill in the relevant data, and move this file to ~/.humbug/humbug.cfg
 
 [smtp]
 Name=smtp.gmail.com
@@ -9,6 +9,6 @@ Port=587
 TLS=true
 
 [client]
-Maildir=./testmaildir
+Maildir=/home/user/mail/
 DisplayN=25
 User=User <user@example.com>
