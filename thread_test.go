@@ -10,12 +10,13 @@ func TestGetMessages(t *testing.T) {
 	msgs := Scan(dir)
 	threads := Thread(msgs)
 
-	if len(threads) != 34 {
-		t.Error("Incorrect number of threads")
+	if len(threads) != 26 {
+		t.Errorf("Incorrect number of threads, expected %v got %v", 26, len(threads))
 	}
 
-	msg := threads["Re: Hannover BSD meetup"]
-	if strings.Contains(msg.Summary(), "Hannover BSD meetup") == false {
-		t.Error("Could not find thread.")
+	wantSubject := "Hannover BSD meetup"
+	msg := threads["<20150122140230.GA18519@autobahn.atexit.net>"]
+	if strings.Contains(msg.Summary(), wantSubject) == false {
+		t.Errorf("Could not find thread with subject %v, found %v instead.", wantSubject, msg.Summary())
 	}
 }

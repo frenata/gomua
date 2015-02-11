@@ -2,6 +2,7 @@ package gomua
 
 import (
 	"fmt"
+	"strings"
 )
 
 // MessageThread is a linked list of Messages
@@ -30,6 +31,10 @@ func (t *MessageThread) String() string {
 
 // Summary returns a subject - from summary of the messages in this thread
 func (t *MessageThread) Summary() string {
+	if t.head == nil {
+		return "No message."
+	}
+
 	node := t.head
 	var output string
 	subject := node.msg.Header.Get("Subject")
@@ -60,12 +65,18 @@ func Thread(msgs []Mail) map[string]*MessageThread {
 	for _, m := range msgs {
 		node := new(ThreadNode)
 		node.msg = m.(*Message)
-		if threads[node.msg.Header.Get("Subject")] == nil {
+		refs := node.msg.Header.Get("References")
+		refSlice := strings.Split(refs, " ")
+		parent := refSlice[0]
+		if len(parent) == 0 {
+			parent = node.msg.Header.Get("Message-Id")
+		}
+		if threads[parent] == nil {
 			thread := new(MessageThread)
 			thread.head = node
-			threads[node.msg.Header.Get("Subject")] = thread
+			threads[parent] = thread
 		} else {
-			existingThread := threads[node.msg.Header.Get("Subject")]
+			existingThread := threads[parent]
 			existingThread.appendNode(node)
 		}
 	}
